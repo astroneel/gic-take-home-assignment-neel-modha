@@ -3,18 +3,18 @@
 import re
 from collections import defaultdict
 
-directions = ['N', 'E', 'S', 'W']  # Clockwise directions
+DIRECTIONS = ['N', 'E', 'S', 'W']  # Clockwise directions
 
 
 # --------------- Helper Functions ---------------
 
 def rotate_left(direction):
 
-    return directions[(directions.index(direction) - 1) % 4]
+    return DIRECTIONS[(DIRECTIONS.index(direction) - 1) % 4]
 
 def rotate_right(direction):
 
-    return directions[(directions.index(direction) + 1) % 4]
+    return DIRECTIONS[(DIRECTIONS.index(direction) + 1) % 4]
 
 def move_forward(x, y, direction, width, height):
 
@@ -107,6 +107,9 @@ class Simulation:
             print(f"- {car.car_details(show_commands = show_commands)}")
 
     def run(self):
+
+        if not self.cars:
+            return False
         
         self.show_cars()
         step = 0
@@ -126,14 +129,18 @@ class Simulation:
                     car.execute_command(command, self.width, self.height)
                     
                     if command == "F" and len(self.positions[(car.x, car.y)]) > 0:
-                        print(f"- {car.name}, collides with {', '.join(c.name for c in self.positions[(car.x, car.y)])} at ({car.x}, {car.y}) at step {step}.")
-                        car.collided = True
 
+                        car.collided = True
                         collided_cars = []
+
                         for collided_car in self.positions[(car.x, car.y)]:
                             collided_car.collided = True
-                            collided_cars.append(collided_car)
-                        print(f"- {', '.join(c.name for c in collided_cars)}, collides with {car.name} at ({car.x}, {car.y}) at step {step}.")
+                            collided_cars.append(collided_car.name)
+
+                        collided_cars = sorted(collided_cars, reverse = True)
+
+                        print(f"- {car.name}, collides with {', '.join(collided_cars)} at ({car.x}, {car.y}) at step {step}.")
+                        print(f"- {', '.join(collided_cars)}, collides with {car.name} at ({car.x}, {car.y}) at step {step}.")
 
                     self.positions[(prev_x, prev_y)].remove(car)
                     self.positions[(car.x, car.y)].add(car)
@@ -205,7 +212,7 @@ def add_car(sim):
                 print("Invalid car coordinates. Please enter two Positive Integer values within the set simulation bounds.")
                 continue
 
-            if direction not in directions:
+            if direction not in DIRECTIONS:
                 print("Invalid car direction. Please enter N, S, W, or E.")
                 continue
 
@@ -256,11 +263,11 @@ def main():
         
         elif choice == '2':
 
-            if not sim.cars:
+            result = sim.run()
+
+            if not result:
                 print("\nNo cars added to simulation. Please add at least one car before running.")
                 continue
-
-            sim.run()
                 
             print("\n[1] Start over (Restart simulation)")
             print("[2] Reset simulation with new cars")
