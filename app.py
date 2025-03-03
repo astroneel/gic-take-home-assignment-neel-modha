@@ -54,11 +54,11 @@ def move_forward(x: int, y: int, direction: str, width: int, height: int) -> Tup
         Tuple[int, int]: The new (x, y) coordinates after moving.
     """
 
-    if direction == 'N' and y + 1 < height:
+    if direction == 'N' and y + 1 <= height:
         return x, y + 1
     elif direction == 'S' and y - 1 >= 0:
         return x, y - 1
-    elif direction == 'E' and x + 1 < width:
+    elif direction == 'E' and x + 1 <= width:
         return x + 1, y
     elif direction == 'W' and x - 1 >= 0:
         return x - 1, y
@@ -270,17 +270,17 @@ class Simulation:
                     car.execute_command(command, self.width, self.height)
                     
                     # Collision handling
-                    if command == "F" and len(self.positions[(car.x, car.y)]) > 0:
+                    collided_cars = []
 
-                        car.collided = True
-                        collided_cars = []
-
-                        for collided_car in self.positions[(car.x, car.y)]:
+                    for collided_car in self.positions[(car.x, car.y)]:
+                        if collided_car != car:
                             collided_car.collided = True
                             collided_cars.append(collided_car.name)
 
-                        collided_cars = sorted(collided_cars, reverse = True)
-
+                    collided_cars = sorted(collided_cars, reverse = True)
+                    
+                    if command == "F" and len(collided_cars) > 0:
+                        car.collided = True
                         print(f"- {car.name}, collides with {', '.join(collided_cars)} at ({car.x}, {car.y}) at step {step}.")
                         print(f"- {', '.join(collided_cars)}, collides with {car.name} at ({car.x}, {car.y}) at step {step}.")
 
